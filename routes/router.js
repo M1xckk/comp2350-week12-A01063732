@@ -41,6 +41,41 @@ router.get("/populateData", async (req, res) => {
 	}
 	});
 
+	router.get('/deleteUser', async (req, res) => {
+		try {
+		const schema = Joi.string().max(25).required();
+			const validationResult = schema.validate(req.query.id);
+			if (validationResult.error != null) {
+			console.log(validationResult.error);
+			throw validationResult.error;
+			}
+			await Pet.deleteMany({_id:{$in:req.query.id}}).exec();
+			await User.deleteOne({_id: req.query.id}).exec();
+			res.redirect("/");
+		} catch (ex) {
+			res.render('error', {message: 'Error'});
+			console.log("Error");
+			console.log(ex);
+		}
+	});
+
+	router.post("/addUser", async(req, res)=> {
+		try {
+			await User.create({
+				first_name: req.body.first_name,
+				last_name: req.body.last_name,
+				email: req.body.email,
+				password_hash: "thisisnotreallyahash",
+				password_salt: "notagreatsalt",
+			});
+			res.redirect("/");
+			} catch (ex) {
+			res.render('error', {message: 'Error'});
+			console.log("Error");
+			console.log(ex);
+		}
+	})
+
 	router.get('/', async (req, res) => {
 		console.log("page hit");
 		try {
